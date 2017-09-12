@@ -1,7 +1,10 @@
-EXE_NAME = ./test.out
+all: test.out dump.out
 
-$(EXE_NAME): test.cpp
-	g++ -o $@ $^
+test.out: test.cpp
+	clang -o test.out --std=c++11 -lstdc++ test.cpp
+
+dump.out: dump.cpp
+	clang -o dump.out --std=c++11 -lstdc++ dump.cpp
 
 clean:
-	rm $(EXE_NAME)
+	rm test.out dump.out
