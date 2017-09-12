@@ -296,6 +296,73 @@ inline std::string Reader::MatchExpectedString(InputStream& inputStream, const s
 }
 
 
+inline void Reader::UnEscapeUnicodeChar(InputStream& inputStream, std::string& string)
+{
+   int utf = 0;
+   int count = 4;
+   while(count--)
+   {
+      bool valid = false;
+      char code = inputStream.Peek();
+      if('0' <= code && code <= '9')
+      {
+         utf = (utf << 4) + code - '0';
+         valid = true;
+      }
+      else if('a' <= code && code <= 'f')
+      {
+         utf = (utf << 4) + code - 'a' + 10;
+         valid = true;
+      }
+      else if('A' <= code && code <= 'F')
+      {
+         utf = (utf << 4) + code - 'A' + 10;
+         valid = true;
+      }
+      if(valid)
+      {
+         inputStream.Get();
+      }
+      else
+      {
+         std::string sMessage = std::string("Invalid unicode escape code found in string: ") + code;
+         throw ScanException(sMessage, inputStream.GetLocation());
+      }
+   }
+   int bits = 0;
+   if(utf > (1 << 27) - 1)
+   {
+      bits = 30;
+      string.push_back((char)(0xFC | ((utf >> bits) & 1)));
+   }
+   else if(utf > (1 << 22) - 1)
+   {
+      bits = 24;
+      string.push_back((char)(0xF8 | ((utf >> bits) & 3)));
+   }
+   else if(utf > (1 << 17) - 1)
+   {
+      bits = 18;
+      string.push_back((char)(0xF0 | ((utf >> bits) & 7)));
+   }
+   else if(utf > (1 << 12) - 1)
+   {
+      bits = 12;
+      string.push_back((char)(0xE0 | ((utf >> bits) & 0xF)));
+   }
+   else if(utf > (1 << 8) - 1)
+   {
+      bits = 6;
+      string.push_back((char)(0xC0 | ((utf >> bits) & 0x1F)));
+   }
+   while(bits >= 6)
+   {
+      bits -= 6;
+      string.push_back((char)(0x80 | ((utf >> bits) & 0x3F)));
+   }
+}
+
+
 inline std::string Reader::MatchString(InputStream& inputStream)
 {
    MatchExpectedString(inputStream, "\"");
@@ -320,7 +387,11 @@ inline std::string Reader::MatchString(InputStream& inputStream)
             case 'n':      string.push_back('\n');    break;
             case 'r':      string.push_back('\r');    break;
             case 't':      string.push_back('\t');    break;
-            case 'u':      string.push_back('\u');    break; // TODO: what do we do with this?
+            case 'u':
+            case 'U': {
+               UnEscapeUnicodeChar(inputStream, string);
+               break;
+            }
             default: {
                std::string sMessage = std::string("Unrecognized escape sequence found in string: \\") + c;
                throw ScanException(sMessage, inputStream.GetLocation());

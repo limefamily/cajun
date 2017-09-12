@@ -125,6 +125,7 @@ private:
    void Scan(Tokens& tokens, InputStream& inputStream);
 
    void EatWhiteSpace(InputStream& inputStream);
+   void UnEscapeUnicodeChar(InputStream& inputStream, std::string& string);
    std::string MatchString(InputStream& inputStream);
    std::string MatchNumber(InputStream& inputStream);
    std::string MatchExpectedString(InputStream& inputStream, const std::string& sExpected);

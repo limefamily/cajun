@@ -132,6 +132,13 @@ public:
    operator String& ();
    operator Null& ();
 
+   bool IsObject () const;
+   bool IsArray () const;
+   bool IsNumber () const;
+   bool IsBoolean () const;
+   bool IsString () const;
+   bool IsNull () const;
+
    // provides quick access to children when real element type is object
    UnknownElement& operator[] (const std::string& key);
    const UnknownElement& operator[] (const std::string& key) const;
@@ -161,6 +168,9 @@ private:
 
    template <typename ElementTypeT>
    class ConstCastVisitor_T;
+
+   template <typename ElementTypeT>
+   bool CanCastTo() const;
 
    template <typename ElementTypeT>
    const ElementTypeT& CastTo() const;

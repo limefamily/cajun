@@ -154,7 +154,14 @@ inline UnknownElement::operator Boolean& ()   { return ConvertTo<Boolean>(); }
 inline UnknownElement::operator String& ()    { return ConvertTo<String>(); }
 inline UnknownElement::operator Null& ()      { return ConvertTo<Null>(); }
 
-inline UnknownElement& UnknownElement::operator = (const UnknownElement& unknown) 
+inline bool UnknownElement::IsObject () const    { return CanCastTo<Object>(); };
+inline bool UnknownElement::IsArray () const     { return CanCastTo<Array>(); };
+inline bool UnknownElement::IsNumber () const    { return CanCastTo<Number>(); };
+inline bool UnknownElement::IsBoolean () const   { return CanCastTo<Boolean>(); };
+inline bool UnknownElement::IsString () const    { return CanCastTo<String>(); };
+inline bool UnknownElement::IsNull () const      { return CanCastTo<Null>(); };
+
+inline UnknownElement& UnknownElement::operator = (const UnknownElement& unknown)
 {
    // always check for this
    if (&unknown != this)
@@ -196,6 +203,17 @@ inline const UnknownElement& UnknownElement::operator[] (size_t index) const
    // throws if we aren't an array
    const Array& array = CastTo<Array>();
    return array[index];
+}
+
+
+template <typename ElementTypeT>
+bool UnknownElement::CanCastTo() const
+{
+   ConstCastVisitor_T<ElementTypeT> castVisitor;
+   m_pImp->Accept(castVisitor);
+   if (castVisitor.m_pElement != 0)
+      return true;
+   return false;
 }
 
 
