@@ -38,19 +38,19 @@ namespace json
 class Writer : private ConstVisitor
 {
 public:
-   static void Write(const Object& object, std::ostream& ostr);
-   static void Write(const Array& array, std::ostream& ostr);
-   static void Write(const String& string, std::ostream& ostr);
-   static void Write(const Number& number, std::ostream& ostr);
-   static void Write(const Boolean& boolean, std::ostream& ostr);
-   static void Write(const Null& null, std::ostream& ostr);
-   static void Write(const UnknownElement& elementRoot, std::ostream& ostr);
+   static void Write(const Object& object, std::ostream& ostr, bool indent = false);
+   static void Write(const Array& array, std::ostream& ostr, bool indent = false);
+   static void Write(const String& string, std::ostream& ostr, bool indent = false);
+   static void Write(const Number& number, std::ostream& ostr, bool indent = false);
+   static void Write(const Boolean& boolean, std::ostream& ostr, bool indent = false);
+   static void Write(const Null& null, std::ostream& ostr, bool indent = false);
+   static void Write(const UnknownElement& elementRoot, std::ostream& ostr, bool indent = false);
 
 private:
-   Writer(std::ostream& ostr);
+   Writer(std::ostream& ostr, bool indent);
 
    template <typename ElementTypeT>
-   static void Write_i(const ElementTypeT& element, std::ostream& ostr);
+   static void Write_i(const ElementTypeT& element, std::ostream& ostr, bool indent);
 
    void Write_i(const Object& object);
    void Write_i(const Array& array);
@@ -68,6 +68,7 @@ private:
    virtual void Visit(const Null& null);
 
    std::ostream& m_ostr;
+   bool m_indent;
    int m_nTabDepth;
 };
 
